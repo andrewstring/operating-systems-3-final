@@ -3,6 +3,7 @@
 #include <chrono>
 #include <queue>
 #include <string>
+#include "testing.h"
 
 using namespace std;
 
@@ -30,6 +31,12 @@ void wait(SharedMemory *sharedMemory, Semaphore toAccess) {
         case chairSem:
             if (sharedMemory->chairSemaphore < sharedMemory->numOfChairs) {
                 sharedMemory->chairSemaphore++;
+                assertLessThanEqualTo(
+                    sharedMemory->chairSemaphore,
+                    sharedMemory->numOfChairs,
+                    "Chair semaphore less than or equal to the number of chairs",
+                    "Chair semaphore went out of bounds - larger than number of chairs"
+                );
             }
             break;
     }
@@ -80,6 +87,12 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
 // setup the number of chairs that are open to sit in
 void setNumChairs(SharedMemory *sharedMemory, int numChairs) {
     sharedMemory->numOfChairs = numChairs;
+    assertInt(
+        sharedMemory->numOfChairs,
+        numChairs,
+        "Chair semaphore was set correctly",
+        "Chair semaphore was set incorrectly"
+    );
 }
 
 void enterBarberShop(SharedMemory *sharedMemory, string *customer) {
@@ -112,8 +125,6 @@ void cutHair(SharedMemory *sharedMemory) {
 
     acquire(sharedMemory, barberMut);
 
-    
-
     // dequeue customer having their haircut
     string *customer = memory->customersInShop.front();
     //cout << "Started cutting " + *customer + "'s hair\n";
@@ -122,17 +133,6 @@ void cutHair(SharedMemory *sharedMemory) {
     this_thread::sleep_for(chrono::seconds(2));
 
     memory->customersInShop.pop();
-
-    // TEST 3 VARIABLE 1
-    int numCustomers = memory->chairSemaphore;
-
-    // TEST 3
-    if(memory->customersInShop.size() == numCustomers - 1) {
-        cout << "TEST 3: SUCCESS - Num of customers remains the same after hair is cut but customer is about to leave\n";
-    } else {
-        cout << "TEST 3: FAILED\n";
-    }
-
     //cout << "Finished cutting " + *customer + "'s hair\n";
     //cout.flush();
 
@@ -175,23 +175,8 @@ void* producer(void *sharedMemory) {
             enterBarberShop(memory, &people[0]);
             enterBarberShop(memory, &people[1]);
             enterBarberShop(memory, &people[2]);
-
-            // TEST 1
-            if(memory->chairSemaphore == memory->numOfChairs) {
-                cout << "TEST 1: SUCCESS - People successfully entered barber shop\n";
-            } else {
-                cout << "TEST 1: FAILED\n"; 
-            } 
-
             enterBarberShop(memory, &people[3]);
             enterBarberShop(memory, &people[4]);
-
-            // TEST 2
-            if(memory->chairSemaphore == memory->numOfChairs) {
-                cout << "TEST 2: SUCCESS - Barber shop only admitted max number of seats\n";
-            } else {
-                cout << "TEST 2: FAILED\n"; 
-            } 
 
             // wait before entering more people
             this_thread::sleep_for(chrono::seconds(3));
