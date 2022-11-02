@@ -13,6 +13,13 @@ void assertInt(int a, int b, string pass, string fail) {
     }
     testNum++;
 }
+void assertIntNotEqual(int a, int b, string pass, string fail) {
+    if (a != b) {
+        cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
+    } else {
+        cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
+    }
+}
 void assertLessThan(int a, int b, string pass, string fail) {
     if(a < b) {
         cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";

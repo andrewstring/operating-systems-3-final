@@ -100,10 +100,20 @@ void enterBarberShop(SharedMemory *sharedMemory, string *customer) {
 
     // only allow customers to enter if there are open seats
     if (sharedMemory->chairSemaphore >= sharedMemory->numOfChairs) {
+        assertLessThanEqualTo(
+            sharedMemory->numOfChairs,
+            sharedMemory->chairSemaphore,
+            "Full semaphore prevented admission of customer",
+            "Full semaphore did not prevent admission of customer");
         //cout << "Barber shop is full..." + *customer + " did not enter\n";
         //cout.flush();
     }
     else {
+        assertLessThan(
+            sharedMemory->chairSemaphore,
+            sharedMemory->numOfChairs,
+            "Non-full semaphore allowed admission of customer",
+            "Non-full semaphore did not allow admission of customer");
         sharedMemory->customersInShop.push(customer);
         //cout << *customer + " has entered the barber shop\n";
         //cout.flush();
@@ -115,6 +125,11 @@ void enterBarberShop(SharedMemory *sharedMemory, string *customer) {
 
 void leaveBarberShop(SharedMemory *sharedMemory, string *customer) {
     release(sharedMemory, barberMut);
+    assertInt(
+        sharedMemory->barberMutex,
+        1,
+        "Barber Mutex successful release",
+        "Barber Mutex unsuccessful release");
 
     //cout << *customer + " left the barber shop\n";
     //cout.flush();
@@ -124,6 +139,12 @@ void cutHair(SharedMemory *sharedMemory) {
     SharedMemory *memory = (struct SharedMemory*) sharedMemory;
 
     acquire(sharedMemory, barberMut);
+    assertInt(
+        sharedMemory->barberMutex,
+        0,
+        "Barber Mutex successful acquire",
+        "Barber Mutex unsuccessful acquire"
+    );
 
     // dequeue customer having their haircut
     string *customer = memory->customersInShop.front();
