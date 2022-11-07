@@ -219,6 +219,7 @@ void* producer(void *sharedMemory) {
             enterBarberShop(memory, &people[9]);
 
             this_thread::sleep_for(chrono::seconds(5));
+
             assertInt(
                 memory->customersInShop.size(),
                 memory->chairSemaphore,
