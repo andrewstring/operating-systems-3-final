@@ -157,6 +157,8 @@ void cutHair(SharedMemory *sharedMemory) {
     //cout << "Finished cutting " + *customer + "'s hair\n";
     //cout.flush();
 
+    
+
     leaveBarberShop(memory, customer);
 }
 
@@ -171,6 +173,12 @@ void* barber(void *sharedMemory) {
             if (memory->chairSemaphore > 0 && memory->barberMutex == 1) {
                 cutHair(memory);
                 signal(memory, chairSem);
+                assertInt(
+                    memory->chairSemaphore,
+                    memory->customersInShop.size(),
+                    "Customer has left - customer queue is same size value as chairSemaphore",
+                    "Customer has left - customer queue is not same size value as chairSemaphore"
+                );
             }
         }
     }
