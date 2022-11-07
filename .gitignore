@@ -1,3 +1,7 @@
 *.out
 *.ipynb_checkpoints
 *hw-2.ipynb
+.idea/
+.vscode/
+CMakeLists.txt
+cmake-build-debug/
