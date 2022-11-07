@@ -54,7 +54,7 @@ void assertIntInArray(int a, int *b, string pass, string fail) {
             in++;
         }
     }
-    if(in == sizeof(b)/sizeof(b[0])) {
+    if(in == sizeof(*b)/sizeof(b[0])) {
         cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
     } else {
         cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
