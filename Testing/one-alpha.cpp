@@ -90,8 +90,8 @@ void setNumChairs(SharedMemory *sharedMemory, int numChairs) {
     assertInt(
         sharedMemory->numOfChairs,
         numChairs,
-        "Chair semaphore was set correctly",
-        "Chair semaphore was set incorrectly"
+        "Chair semaphore limit was set correctly",
+        "Chair semaphore limit was set incorrectly"
     );
 }
 
@@ -209,6 +209,16 @@ void* producer(void *sharedMemory) {
             // wait before entering more people
             this_thread::sleep_for(chrono::seconds(10));
             enterBarberShop(memory, &people[9]);
+
+            this_thread::sleep_for(chrono::seconds(5));
+            assertInt(
+                memory->customersInShop.size(),
+                memory->chairSemaphore,
+                "All customers have left: size of customer queue and chairSemaphore are zero",
+                "Customer queue or chairSemaphore ERROR: both should equal zero when all customers have left"
+            );
+
+            endTesting();
 
             //prevent from running again
             run = false;
