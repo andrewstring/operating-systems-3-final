@@ -86,8 +86,9 @@ int getRandomIngredientIndex(int min, int max) {
     assertIntInArray(
         val,
         inArrayCheck,
-        "WORKD",
-        "NO"
+        max + 1,
+        "The randomly generated index is in the range",
+        "The randomly generated index is not in the range"
     );
 
     return val;

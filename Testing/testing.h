@@ -46,20 +46,27 @@ void assertLessThanEqualTo(int a, int b, string pass, string fail) {
     testNum++;
 }
 
-void assertIntInArray(int a, int *b, string pass, string fail) {
-    int in = 0;
-    for (int i = 0; i < sizeof(b)/sizeof(b[0]); ++i) {
-        cout << "i\n";
+void assertIntInArray(int a, int *b, int size, string pass, string fail) {
+    int outOfArray = 0;
+    for (int i = 0; i < size; ++i) {
         if (a != b[i]) {
-            in++;
+            outOfArray++;
         }
     }
-    if(in == sizeof(*b)/sizeof(b[0])) {
+    if(outOfArray != size) {
         cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
     } else {
         cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
     }
     testNum++;
+}
+
+void checkUnique(Ingredient *ingredients, int size, string pass, string fail) {
+    Ingredient first = ingredients[0];
+    for(int i = 1; i < size; i++) {
+        if()
+
+    }
 }
 
 void endTesting() {
