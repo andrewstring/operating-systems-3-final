@@ -171,12 +171,24 @@ void* smokerOne(void *sharedMemory) {
                 // only run if smoker has the third ingredient
                 if (memory->smokerOne != memory->agentIngredients[0] and
                     memory->smokerOne != memory->agentIngredients[1]) {
+                        assertIngredientNotInArray(
+                            memory->smokerOne,
+                            memory->agentIngredients,
+                            "Smoker one did not have the two agent ingredients",
+                            "Smoker one had one of the two agent ingredients"
+                        );
                     //cout << "Smoker one started smoking\n";
                     //cout.flush();
                     this_thread::sleep_for(chrono::seconds(2));
                     //cout << "Smoker one finished smoking\n";
                     //cout.flush();
                     acquire(memory, smokerMutex);
+                    assertInt(
+                        memory->smokerMutex,
+                        0,
+                        "Smoker Mutex was successfully acquired",
+                        "Smoker Mutex was not successfully acquired"
+                    );
                     release(memory, agentMutex);
                 }
                 release(memory, criticalSection);
@@ -197,12 +209,24 @@ void* smokerTwo(void *sharedMemory) {
                 // only run if smoker has the third ingredient
                 if (memory->smokerTwo != memory->agentIngredients[0] and
                     memory->smokerTwo != memory->agentIngredients[1]) {
+                        assertIngredientNotInArray(
+                            memory->smokerTwo,
+                            memory->agentIngredients,
+                            "Smoker two did not have the two agent ingredients",
+                            "Smoker two had one of the two agent ingredients"
+                        );
                     //cout << "Smoker two started smoking\n";
                     //cout.flush();
                     this_thread::sleep_for(chrono::seconds(2));
                     //cout << "Smoker two finished smoking\n";
                     //cout.flush();
                     acquire(memory, smokerMutex);
+                    assertInt(
+                        memory->smokerMutex,
+                        0,
+                        "Smoker Mutex was successfully acquired",
+                        "Smoker Mutex was not successfully acquired"
+                    );
                     release(memory, agentMutex);
                 }
                 release(memory, criticalSection);
@@ -223,12 +247,24 @@ void* smokerThree(void *sharedMemory) {
                 // only run if smoker has the third ingredient
                 if (memory->smokerThree != memory->agentIngredients[0] and
                     memory->smokerThree != memory->agentIngredients[1]) {
+                        assertIngredientNotInArray(
+                            memory->smokerThree,
+                            memory->agentIngredients,
+                            "Smoker three did not have the two agent ingredients",
+                            "Smoker three had one of the two agent ingredients"
+                        );
                     //cout << "Smoker three started smoking\n";
                     //cout.flush();
                     this_thread::sleep_for(chrono::seconds(2));
                     //cout << "Smoker three finished smoking\n";
                     //cout.flush();
                     acquire(memory, smokerMutex);
+                    assertInt(
+                        memory->smokerMutex,
+                        0,
+                        "Smoker Mutex was successfully acquired",
+                        "Smoker Mutex was not successfully acquired"
+                    );
                     release(memory, agentMutex);
                 }
                 release(memory, criticalSection);
@@ -253,6 +289,12 @@ void* agent(void *sharedMemory) {
                 //        + " and " + ingredientOutput[memory->agentIngredients[1]] + "\n";
                 //cout.flush();
                 acquire(memory, agentMutex);
+                assertInt(
+                    memory->agentMutex,
+                    0,
+                    "Agent Mutex was successfully acquired",
+                    "Agent Mutex was not successfully acquired"
+                );
 
                 // this wait is the time it takes for agent to place ingredients on table
                 this_thread::sleep_for(chrono::seconds(2));

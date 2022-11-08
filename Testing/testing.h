@@ -3,9 +3,6 @@
 
 using namespace std;
 
-int testNum = 1;
-
-
 enum Ingredient {
     Tobacco,
     Paper,
@@ -14,43 +11,40 @@ enum Ingredient {
 
 void assertInt(int a, int b, string pass, string fail) {
     if (a == b) {
-        cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
+        cout << "TEST PASSED: " + pass + "\n";
         cout.flush();
     } else {
-        cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
+        cout << "TEST FAILED: " + fail + "\n";
         cout.flush();
     }
-    testNum++;
 }
 void assertIntNotEqual(int a, int b, string pass, string fail) {
     if (a != b) {
-        cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
+        cout << "TEST PASSED: " + pass + "\n";
         cout.flush();
     } else {
-        cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
+        cout << "TEST FAILED: " + fail + "\n";
         cout.flush();
     }
 }
 void assertLessThan(int a, int b, string pass, string fail) {
     if(a < b) {
-        cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
+        cout << "TEST PASSED: " + pass + "\n";
         cout.flush();
     } else {
-        cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
+        cout << "TEST FAILED: " + fail + "\n";
         cout.flush();
     }
-    testNum++;
 }
 
 void assertLessThanEqualTo(int a, int b, string pass, string fail) {
     if(a<=b) {
-        cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
+        cout << "TEST PASSED: " + pass + "\n";
         cout.flush();
     } else {
-        cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
+        cout << "TEST FAILED: " + fail + "\n";
         cout.flush();
     }
-    testNum++;
 }
 
 void assertIntInArray(int a, int *b, int size, string pass, string fail) {
@@ -61,11 +55,12 @@ void assertIntInArray(int a, int *b, int size, string pass, string fail) {
         }
     }
     if(outOfArray != size) {
-        cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
+        cout << "TEST PASSED: " + pass + "\n";
+        cout.flush();
     } else {
-        cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
+        cout << "TEST FAILED: " + fail + "\n";
+        cout.flush();
     }
-    testNum++;
 }
 
 int assertUniqueIngredientArray(Ingredient *ingredients, int size, string pass, string fail) {
@@ -73,25 +68,39 @@ int assertUniqueIngredientArray(Ingredient *ingredients, int size, string pass, 
     for(int i = 0; i < size; i++) {
         for(int j = i+1; j < size; j++) {
             if (ingredients[i] == ingredients[j]) {
-                cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
-                testNum++;
+                cout << "TEST FAILED: " + fail + "\n";
+                cout.flush();
                 return 0;
             }
         }
     }
-    cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
-    testNum++;
+    cout << "TEST PASSED: " + pass + "\n";
+    cout.flush();
     return 1;
 }
 
 void assertIngredientNotEqual(Ingredient ingredientOne, Ingredient ingredientTwo, string pass, string fail) {
     if(ingredientOne != ingredientTwo) {
-        cout << "TEST " + to_string(testNum) + " PASSED: " + pass + "\n";
+        cout << "TEST PASSED: " + pass + "\n";
+        cout.flush();
     }
     else {
-        cout << "TEST " + to_string(testNum) + " FAILED: " + fail + "\n";
+        cout << "TEST FAILED: " + fail + "\n";
+        cout.flush();
     }
-    testNum++;
+}
+
+int assertIngredientNotInArray(Ingredient ingredient, Ingredient *ingredientArray, string pass, string fail) {
+    for(int i = 0; i < sizeof(*ingredientArray)/sizeof(ingredientArray[0]); ++i) {
+        if (ingredient == ingredientArray[i]) {
+            cout << "TEST FAILED: " + fail + "\n";
+            cout.flush();
+            return 0;
+        }
+    }
+    cout << "TEST PASSED: " + pass + "\n";
+    cout.flush();
+    return 1;
 }
 
 void endTesting() {
