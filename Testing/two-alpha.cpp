@@ -13,11 +13,11 @@ enum Mutex {
         criticalSection,
 };
 
-enum Ingredient {
-    Tobacco,
-    Paper,
-    Matches
-};
+// enum Ingredient {
+//     Tobacco,
+//     Paper,
+//     Matches
+// };
 
 // mapping that will be used for accessing Ingredients by index
 Ingredient ingredientMapping[3] = {Tobacco, Paper, Matches};
@@ -122,6 +122,13 @@ void setSmokerIngredients(SharedMemory *sharedMemory) {
         }
     }
 
+    assertUniqueIngredientArray(
+        ingredient,
+        3,
+        "All agent ingredients are unique",
+        "Not all agent ingredients are unique"
+    );
+
     //set smoker ingredients
     sharedMemory->smokerOne = ingredient[0];
     sharedMemory->smokerTwo = ingredient[1];
@@ -142,8 +149,16 @@ void setTwoIngredients(SharedMemory *sharedMemory) {
             index++;
         }
     }
+
     int ingredientTwoIndex = getRandomIngredientIndex(0,1);
     sharedMemory->agentIngredients[1] = remainingIngredients[ingredientTwoIndex];
+
+    assertIngredientNotEqual(
+        sharedMemory->agentIngredients[0],
+        sharedMemory->agentIngredients[1],
+        "Two agent ingredients are unique",
+        "Two agent ingredients are not unique"
+    );
 }
 
 void* smokerOne(void *sharedMemory) {
