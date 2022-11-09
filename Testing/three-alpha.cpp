@@ -249,6 +249,7 @@ void* producer(void *sharedMemory) {
             //prevent from running again
             run = false;
 
+            this_thread::sleep_for(chrono::seconds(2));
             endTesting();
         }
     }
