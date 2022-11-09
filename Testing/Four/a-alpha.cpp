@@ -218,10 +218,10 @@ void leaveDatabase(SharedMemory *sharedMemory) {
             );
             release(sharedMemory, writerMut);
                 assertInt(
-                    sharedMemory->readerMutex,
+                    sharedMemory->writerMutex,
                     1,
-                    "Reader mutex was successfully released",
-                    "Reader mutex was not successfully released"
+                    "Writer mutex was successfully released",
+                    "Writer mutex was not successfully released"
                 );
         }
 }
