@@ -151,6 +151,12 @@ void taHelpStudent(SharedMemory *sharedMemory) {
     //cout.flush();
     sharedMemory->studentWithTa.pop();
     release(sharedMemory, taMut);
+    assertInt(
+        sharedMemory->studentWithTa.size(),
+        0,
+        "Released TA Mutex when student with TA queue is empty",
+        "Released TA Mutex when student with TA queue was not empty"
+    );
 }
 
 void* ta(void *sharedMemory) {
@@ -219,14 +225,29 @@ void* producer(void *sharedMemory) {
                     enterHallway(memory, &students[9]);
                     release(memory, criticalSection);
                     run2 = false;
-                }
-            }
 
+                
+                    }
+            }
+            this_thread::sleep_for(chrono::seconds(8));
+            assertInt(
+                memory->studentsInHallway.size(),
+                0,
+                "Students in hallway queue was empty when all students have left",
+                "Studens in hallway queue was not empty when all students have left"
+            );
+            assertInt(
+                memory->studentWithTa.size(),
+                0,
+                "Student with TA queue was empty when all students have left",
+                "Studens with TA queue was not empty when all students have left"
+            );
+    
             //prevent from running again
             run = false;
         }
     }
-    
+
     return NULL;
 }
 
