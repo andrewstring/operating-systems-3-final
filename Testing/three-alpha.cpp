@@ -172,6 +172,7 @@ void* ta(void *sharedMemory) {
                     "Only admitting student into TAs office when hallway is not empty",
                     "Tying to admit students into TAs office when hallway is empty"
                 );
+
                 taHelpStudent(memory);
             }
         }
@@ -229,7 +230,9 @@ void* producer(void *sharedMemory) {
                 
                     }
             }
+
             this_thread::sleep_for(chrono::seconds(8));
+
             assertInt(
                 memory->studentsInHallway.size(),
                 0,
@@ -245,6 +248,8 @@ void* producer(void *sharedMemory) {
     
             //prevent from running again
             run = false;
+
+            endTesting();
         }
     }
 
