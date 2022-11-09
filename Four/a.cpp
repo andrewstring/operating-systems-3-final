@@ -169,7 +169,7 @@ void* producer(void *sharedMemory) {
 
     while(true) {
         if(memory->criticalSection == 1) {
-            if(memory->writerMutex == 1 && memory->numOfReaders > 1) {
+            if(memory->writerMutex == 1 && memory->numOfReaders > 0) {
                 acquire(memory, criticalSection);
                 tuple<Type, string*> readerEnteringDatabase = removeReader(memory);
                 enterDatabase(memory, readerEnteringDatabase);
