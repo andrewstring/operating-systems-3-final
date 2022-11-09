@@ -190,10 +190,10 @@ void leaveDatabase(SharedMemory *sharedMemory) {
             //cout.flush();
             sharedMemory->numOfPeopleInDatabase--;
             assertInt(
-                sharedMemory->numOfPeopleInDatabase,
+                sharedMemory->numOfReadersInDatabase,
                 sharedMemory->peopleInDatabase.size(),
-                "Number of people in database and size of people in database queue are equal when person is removed from database",
-                "Number of people in database and size of people in database queue are not equal when person is removed from database"
+                "Number of readers in database and size of people in database queue are equal when person is removed from database",
+                "Number of readers in database and size of people in database queue are not equal when person is removed from database"
             );
             if (sharedMemory->numOfReadersInDatabase == 0) {
                 release(sharedMemory, readerMut);
@@ -210,10 +210,10 @@ void leaveDatabase(SharedMemory *sharedMemory) {
             sharedMemory->peopleInDatabase.pop();
             sharedMemory->numOfWritersInDatabase--;
             assertInt(
-                sharedMemory->numOfPeopleInDatabase,
+                sharedMemory->numOfWritersInDatabase,
                 sharedMemory->peopleInDatabase.size(),
-                "Number of people in database and size of people in database queue are equal when person is removed from database2",
-                "Number of people in database and size of people in database queue are not equal when person is removed from database2"
+                "Number of writers in database and size of people in database queue are equal when person is removed from database",
+                "Number of writers in database and size of people in database queue are not equal when person is removed from database"
             );
             //cout << *(get<1>(personLeaving)) + " (Type: " + typeOutput[get<0>(personLeaving)] + ") HAS LEFT THE DATABASE\n";
             //cout.flush();
