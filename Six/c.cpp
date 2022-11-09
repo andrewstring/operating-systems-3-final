@@ -210,23 +210,6 @@ void* eastwardProducer(void *sharedMemory) {
     }
     release(memory, criticalSection);
 
-//    this_thread::sleep_for(chrono::seconds(5));
-//
-//    bool run2 = true;
-//    while(run2) {
-//        if(memory->criticalSection == 1) {
-//            acquire(memory, criticalSection);
-//            addEastwardStudent(memory, 7);
-//            addEastwardStudent(memory, 8);
-//            addEastwardStudent(memory, 9);
-//            addEastwardStudent(memory, 10);
-//            addEastwardStudent(memory, 11);
-//            addEastwardStudent(memory, 12);
-//            run2 = false;
-//        }
-//    }
-//    release(memory, criticalSection);
-
     return NULL;
 }
 
@@ -247,23 +230,6 @@ void* westwardProducer(void *sharedMemory) {
         }
     }
     release(memory, criticalSection);
-
-//    this_thread::sleep_for(chrono::seconds(4));
-//
-//    bool run2 = true;
-//    while(run2) {
-//        if(memory->criticalSection == 1) {
-//            acquire(memory, criticalSection);
-//            addWestwardStudent(memory, 19);
-//            addWestwardStudent(memory, 20);
-//            addWestwardStudent(memory, 21);
-//            addWestwardStudent(memory, 22);
-//            addWestwardStudent(memory, 23);
-//            addWestwardStudent(memory, 24);
-//            run2 = false;
-//        }
-//    }
-//    release(memory, criticalSection);
 
     return NULL;
 }

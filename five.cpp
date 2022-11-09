@@ -152,13 +152,6 @@ void setRRQuantum(SharedMemory *sharedMemory, int quantum) {
 void* northProducer(void *sharedMemory) {
     SharedMemory *memory = (struct SharedMemory *) sharedMemory;
 
-//    string traveler[26] = {"Alpha", "Bravo", "Charlie", "Delta", "Echo",
-//                           "Foxtrot", "Golf", "Hotel", "India", "Juliet",
-//                           "Kilo", "Lima", "Mike", "November", "Oscar",
-//                           "Papa", "Quebec", "Romeo", "Sierra", "Tango",
-//                           "Uniform", "Victor", "Whisky", "X-Ray", "Yankee",
-//                           "Zulu"};
-
     bool run1 = true;
     while(run1) {
         if(memory->criticalSection == 1) {
@@ -195,13 +188,6 @@ void* northProducer(void *sharedMemory) {
 
 void* southProducer(void *sharedMemory) {
     SharedMemory *memory = (struct SharedMemory *) sharedMemory;
-
-//    string traveler[26] = {"Alpha", "Bravo", "Charlie", "Delta", "Echo",
-//                           "Foxtrot", "Golf", "Hotel", "India", "Juliet",
-//                           "Kilo", "Lima", "Mike", "November", "Oscar",
-//                           "Papa", "Quebec", "Romeo", "Sierra", "Tango",
-//                           "Uniform", "Victor", "Whisky", "X-Ray", "Yankee",
-//                           "Zulu"};
 
     bool run1 = true;
     while(run1) {
@@ -307,8 +293,6 @@ int main() {
     pthread_attr_t attrTravelerConsumer;
     pthread_attr_t attrNorthProducer;
     pthread_attr_t attrSouthProducer;
-
-
 
     pthread_attr_init(&attrNorthProducer);
     pthread_attr_init(&attrSouthProducer);

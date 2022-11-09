@@ -249,8 +249,6 @@ void addPeople(SharedMemory* sharedMemory, string *students) {
         }
     }
     release(sharedMemory, criticalSection);
-
-
 }
 
 
@@ -269,30 +267,18 @@ int main() {
 
     pthread_t tidDatabase;
     pthread_t tidProducer;
-    // pthread_t tidReader;
-    // pthread_t tidWriter;
     pthread_attr_t attrDatabase;
     pthread_attr_t attrProducer;
-    //pthread_attr_t attrReader;
-    //pthread_attr_t attrWriter;
 
     pthread_attr_init(&attrDatabase);
     pthread_attr_init(&attrProducer);
-    //pthread_attr_init(&attrReader);
-    //pthread_attr_init(&attrWriter);
     pthread_create(&tidDatabase, &attrDatabase, database, sharedMemory);
     pthread_create(&tidProducer, &attrProducer, producer, sharedMemory);
-    //pthread_create(&tidReader, &attrReader, readerProducer, sharedMemory);
-    //pthread_create(&tidWriter, &attrWriter, writerProducer, sharedMemory);
 
     addPeople(sharedMemory, people);
 
-
-
     pthread_join(tidDatabase, NULL);
     pthread_join(tidProducer, NULL);
-    //pthread_join(tidReader, NULL);
-    //pthread_join(tidWriter, NULL);
 
     return 0;
 }

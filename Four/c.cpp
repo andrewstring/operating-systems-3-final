@@ -26,8 +26,6 @@ struct SharedMemory {
     int criticalSection = 1;
     queue<tuple<Type, string *>> people;
     queue<tuple<Type, string *>> peopleInDatabase;
-    //int numOfReaders = 0;
-    //int numOfWriters = 0;
     int numOfPeople = 0;
     int numOfPeopleInDatabase = 0;
     int numOfReadersInDatabase = 0;
