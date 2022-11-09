@@ -227,8 +227,6 @@ void* producer(void *sharedMemory) {
                 "Customer queue or chairSemaphore ERROR: both should equal zero when all customers have left"
             );
 
-            endTesting();
-
             //prevent from running again
             run = false;
         }

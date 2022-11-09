@@ -249,8 +249,6 @@ void* producer(void *sharedMemory) {
             //prevent from running again
             run = false;
 
-            this_thread::sleep_for(chrono::seconds(2));
-            endTesting();
         }
     }
 
@@ -271,6 +269,7 @@ int main() {
     pthread_attr_init(&attrProducer);
     pthread_create(&tidTa, &attrTa, ta, sharedMemory);
     pthread_create(&tidProducer, &attrProducer, producer, sharedMemory);
+
 
     pthread_join(tidTa, NULL);
     pthread_join(tidProducer, NULL);
