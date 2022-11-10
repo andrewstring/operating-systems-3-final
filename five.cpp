@@ -8,6 +8,7 @@
 
 using namespace std;
 
+// access points for acquire and release
 enum Mutex {
     northMut,
     southMut,
@@ -18,6 +19,7 @@ enum Direction {
     north,
     south
 };
+
 string directionOutput[2] = {"North Bound", "South Bound"};
 
 struct Traveler {
@@ -35,6 +37,8 @@ struct SharedMemory {
     int numOfNorthTravelers = 0;
     int numOfSouthTravelers = 0;
     int numOfTravelersOnBridge = 0;
+
+    // keep traveler names in shared memory for easy access between threads
     string traveler[26] = {"Alpha", "Bravo", "Charlie", "Delta", "Echo",
                            "Foxtrot", "Golf", "Hotel", "India", "Juliet",
                            "Kilo", "Lima", "Mike", "November", "Oscar",
@@ -86,6 +90,8 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
 void addNorthTraveler(SharedMemory *sharedMemory, string *name) {
     tuple<Direction, string*> newNorthTraveler = make_tuple(north, name);
     sharedMemory->numOfNorthTravelers++;
+
+    // add north traveler to north traveler queue
     sharedMemory->northTravelers.push(newNorthTraveler);
     cout << *name + " (Direction: " + directionOutput[get<0>(newNorthTraveler)] + ") has been added\n";
     cout.flush();
@@ -94,6 +100,8 @@ void addNorthTraveler(SharedMemory *sharedMemory, string *name) {
 tuple<Direction, string*> *removeNorthTraveler(SharedMemory *sharedMemory) {
     tuple<Direction, string*> *retrievedNorthTraveler = &(sharedMemory->northTravelers.front());
     sharedMemory->numOfNorthTravelers--;
+
+    // remove north traveler from north traveler queue
     sharedMemory->northTravelers.pop();
     return retrievedNorthTraveler;
 }
@@ -101,6 +109,8 @@ tuple<Direction, string*> *removeNorthTraveler(SharedMemory *sharedMemory) {
 void addSouthTraveler(SharedMemory *sharedMemory, string *name) {
     tuple<Direction, string*> newSouthTraveler = make_tuple(south, name);
     sharedMemory->numOfSouthTravelers++;
+
+    // add south traveler to south traveler queue
     sharedMemory->southTravelers.push(newSouthTraveler);
     cout << *name + " (Direction: " + directionOutput[get<0>(newSouthTraveler)] + ") has been added\n";
     cout.flush();
@@ -109,12 +119,16 @@ void addSouthTraveler(SharedMemory *sharedMemory, string *name) {
 tuple<Direction, string*> *removeSouthTraveler(SharedMemory *sharedMemory) {
     tuple<Direction, string*> *retrievedSouthTraveler = &(sharedMemory->southTravelers.front());
     sharedMemory->numOfSouthTravelers--;
+
+    // remove south traveler from south traveler queue
     sharedMemory->southTravelers.pop();
     return retrievedSouthTraveler;
 }
 
 void* crossBridge(void *traveler) {
     tuple<Direction, string*> *bridgeTraveler = (tuple<Direction, string*> *) traveler;
+
+    // it will take 2 seconds to cross the bridge
     this_thread::sleep_for(chrono::seconds(2));
     cout << *(get<1>(*bridgeTraveler)) + " (Direction: " + directionOutput[get<0>(*bridgeTraveler)] + ") has crossed the bridge\n";
     cout.flush();
@@ -123,6 +137,8 @@ void* crossBridge(void *traveler) {
 }
 
 pthread_t enterBridge(SharedMemory *sharedMemory, tuple<Direction, string*> *traveler) {
+
+    // create thread for traveller
     pthread_t tidTraveler;
     pthread_attr_t attrTraveler;
 
@@ -132,8 +148,10 @@ pthread_t enterBridge(SharedMemory *sharedMemory, tuple<Direction, string*> *tra
     cout.flush();
 
     if(get<0>(*traveler) == north) {
+        // acquire north mutex if the traveller is northern
         acquire(sharedMemory, northMut);
     } else if(get<0>(*traveler) == south) {
+        // acquire south mutex if the traveller is southern
         acquire(sharedMemory, southMut);
     }
     sharedMemory->numOfTravelersOnBridge++;
