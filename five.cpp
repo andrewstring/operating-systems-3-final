@@ -164,6 +164,7 @@ pthread_t enterBridge(SharedMemory *sharedMemory, tuple<Direction, string*> *tra
 }
 
 void setRRQuantum(SharedMemory *sharedMemory, int quantum) {
+    // program will set the value used for the round robin quantum
     sharedMemory->rrQuantum = quantum;
 }
 
@@ -222,6 +223,7 @@ void* southProducer(void *sharedMemory) {
     }
     release(memory, criticalSection);
 
+    // will wait some time before producing more traveler
     this_thread::sleep_for(chrono::seconds(4));
 
     bool run2 = true;
@@ -244,13 +246,17 @@ void* southProducer(void *sharedMemory) {
 void* travelerConsumer(void *sharedMemory) {
     SharedMemory *memory = (struct SharedMemory *) sharedMemory;
 
+    // start with the north travellers
     Direction rrCurrentSide = north;
 
     while(true) {
+        // run this block only if the round robin is on the north
         if (memory->criticalSection == 1 && rrCurrentSide == north) {
             if (memory->numOfNorthTravelers > 0 && memory->southMutex == 1) {
                 acquire(memory, criticalSection);
                 int counter = 0;
+
+                // create array of thread IDs for north traveller threads
                 pthread_t tidTravelers[memory->rrQuantum];
                 while (counter < memory->rrQuantum) {
                     if (memory->numOfNorthTravelers == 0) {
@@ -260,6 +266,8 @@ void* travelerConsumer(void *sharedMemory) {
                         counter++;
                     }
                 }
+
+                // join north traveller threads
                 for (int i = 0; i < counter; ++i) {
                     pthread_join(tidTravelers[i], NULL);
                     memory->numOfTravelersOnBridge--;
@@ -268,12 +276,18 @@ void* travelerConsumer(void *sharedMemory) {
                     release(memory, northMut);
                 }
             }
+
+            // after the north round robin round, change to a south round
             rrCurrentSide = south;
             release(memory, criticalSection);
+        
+        // run this block only if the round robin is on the south
         } else if (memory->criticalSection == 1 && rrCurrentSide == south) {
             if (memory->numOfSouthTravelers > 0 && memory->northMutex == 1) {
                 acquire(memory, criticalSection);
                 int counter = 0;
+
+                // create array of thread IDs for south traveller threads
                 pthread_t tidTravelers[memory->rrQuantum];
                 while (counter < memory->rrQuantum) {
                     if (memory->numOfSouthTravelers == 0) {
@@ -283,6 +297,8 @@ void* travelerConsumer(void *sharedMemory) {
                         counter++;
                     }
                 }
+
+                // join south traveller threads
                 for (int i = 0; i < counter; ++i) {
                     pthread_join(tidTravelers[i], NULL);
                     memory->numOfTravelersOnBridge--;
@@ -291,6 +307,8 @@ void* travelerConsumer(void *sharedMemory) {
                     release(memory, southMut);
                 }
             }
+
+            // after the south round robin round, change to a north round
             rrCurrentSide = north;
             release(memory, criticalSection);
         }
