@@ -6,12 +6,14 @@
 
 using namespace std;
 
+// access points for acquire and release
 enum Mutex {
     eastwardMut,
     westwardMut,
     criticalSection
 };
 
+// access points for wait and signal
 enum Semaphore {
     monkeysOnRopeSemaphore
 };
@@ -32,6 +34,8 @@ struct Monkey {
     Monkey(int idPass, Destination destinationPass, SharedMemory *sharedMemoryPass);
 };
 
+
+// constructor function for monkey struct
 Monkey::Monkey(int idPass, Destination destinationPass, SharedMemory *sharedMemoryPass) {
     id = idPass;
     destination = destinationPass;
@@ -120,6 +124,8 @@ void setRRQuantum(SharedMemory *sharedMemory, int quantum) {
 void addEastwardMonkey(SharedMemory *sharedMemory, int id) {
     Monkey eastwardMonkey = Monkey(id, east, sharedMemory);
     sharedMemory->numOfEastwardMonkeys++;
+
+    // create and add an eastward monkey to the eastward monkey queue
     sharedMemory->eastwardMonkeys.push(eastwardMonkey);
     cout << "Monkey with id " + to_string(id) + " headed to the " +
     destinationOutput[eastwardMonkey.destination] + " has been added\n";
@@ -130,6 +136,8 @@ void addWestwardMonkey(SharedMemory *sharedMemory, int id) {
     Monkey westwardMonkey = Monkey(id, west, sharedMemory);
     westwardMonkey.id = id;
     sharedMemory->numOfWestwardMonkeys++;
+
+    // create and add a westward monkey to the westward monkey queue
     sharedMemory->westwardMonkeys.push(westwardMonkey);
     cout << "Monkey with id " + to_string(id) + " headed to the " +
             destinationOutput[westwardMonkey.destination] + " has been added\n";
@@ -138,6 +146,8 @@ void addWestwardMonkey(SharedMemory *sharedMemory, int id) {
 
 Monkey removeEastwardMonkey(SharedMemory *sharedMemory) {
     Monkey retrievedEastwardMonkeyTuple = sharedMemory->eastwardMonkeys.front();
+    
+    // remove an eastward monkey from the eastward monkey queue
     sharedMemory->eastwardMonkeys.pop();
     sharedMemory->numOfEastwardMonkeys--;
     return retrievedEastwardMonkeyTuple;
@@ -145,6 +155,8 @@ Monkey removeEastwardMonkey(SharedMemory *sharedMemory) {
 
 Monkey removeWestwardMonkey(SharedMemory *sharedMemory) {
     Monkey retrievedWestwardMonkeyTuple = sharedMemory->westwardMonkeys.front();
+
+    // remove a westward monkey from the westward monkey queue
     sharedMemory->westwardMonkeys.pop();
     sharedMemory->numOfWestwardMonkeys--;
     return retrievedWestwardMonkeyTuple;
@@ -152,19 +164,22 @@ Monkey removeWestwardMonkey(SharedMemory *sharedMemory) {
 
 void* crossRope(void *monkeyRef) {
     Monkey *monkey = (struct Monkey *) monkeyRef;
-        this_thread::sleep_for(chrono::seconds(2));
-        cout << "Monkey with id " + to_string(monkey->id) + " headed to the " + destinationOutput[monkey->destination] +
-                " has crossed the rope\n";
-        cout.flush();
 
-        signal(monkey->sharedMemory, monkeysOnRopeSemaphore);
-        if(monkey->sharedMemory->monkeysOnRopeSemaphore == 0) {
-            if(monkey->destination == east) {
-                release(monkey->sharedMemory, eastwardMut);
-            } else if(monkey->destination == west) {
-                release(monkey->sharedMemory, westwardMut);
-            }
+    // take two seconds for monkey to cross rope
+    this_thread::sleep_for(chrono::seconds(2));
+    cout << "Monkey with id " + to_string(monkey->id) + " headed to the " + destinationOutput[monkey->destination] +
+            " has crossed the rope\n";
+    cout.flush();
+
+    // signal the monkey on rope semaphore once the monkey has crossed the rope
+    signal(monkey->sharedMemory, monkeysOnRopeSemaphore);
+    if(monkey->sharedMemory->monkeysOnRopeSemaphore == 0) {
+        if(monkey->destination == east) {
+            release(monkey->sharedMemory, eastwardMut);
+        } else if(monkey->destination == west) {
+            release(monkey->sharedMemory, westwardMut);
         }
+    }
 
     return NULL;
 }
@@ -172,8 +187,10 @@ void* crossRope(void *monkeyRef) {
 pthread_t enterRope(int id, Destination destination, SharedMemory *sharedMemory) {
 
     if(destination == east) {
+        // acquire the eastward mutex if the monkey is from the east
         acquire(sharedMemory, eastwardMut);
     } else if(destination == west) {
+        // acquire the westward mutex if the monkey is from the west
         acquire(sharedMemory, westwardMut);
     }
 
@@ -187,6 +204,7 @@ pthread_t enterRope(int id, Destination destination, SharedMemory *sharedMemory)
     " has got on the rope\n";
     cout.flush();
 
+    // create monkey thread
     pthread_create(&tidMonkey, &attrMonkey, crossRope, new Monkey(id, destination, sharedMemory));
 
     return tidMonkey;
@@ -211,6 +229,7 @@ void* eastwardProducer(void *sharedMemory) {
     }
     release(memory, criticalSection);
 
+    // wait 5 seconds before adding more eastward monkeys
     this_thread::sleep_for(chrono::seconds(5));
 
     bool run2 = true;
@@ -249,6 +268,7 @@ void* westwardProducer(void *sharedMemory) {
     }
     release(memory, criticalSection);
 
+    // wait four seconds before adding more westward monkeys
     this_thread::sleep_for(chrono::seconds(4));
 
     bool run2 = true;
