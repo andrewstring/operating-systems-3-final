@@ -23,6 +23,7 @@ struct SharedMemory {
     int criticalSection = 1;
     int chairSemaphore = 0;
     int numOfChairs = 0;
+    int testCounter = 0;
     queue<string *> customersInShop;
 } sMem;
 
@@ -130,6 +131,7 @@ void leaveBarberShop(SharedMemory *sharedMemory, string *customer) {
         1,
         "Barber Mutex successful release",
         "Barber Mutex unsuccessful release");
+    sharedMemory->testCounter++;
 
     //cout << *customer + " left the barber shop\n";
     //cout.flush();
@@ -250,6 +252,17 @@ int main() {
     pthread_attr_init(&attrProducer);
     pthread_create(&tidBarber, &attrBarber, barber, sharedMemory);
     pthread_create(&tidProducer, &attrProducer, producer, sharedMemory);
+    
+
+    bool testInProgress = true;
+
+    while (testInProgress) {
+        if(sharedMemory->testCounter >= 5) {
+            this_thread::sleep_for(chrono::seconds(5));
+            endTesting();
+            testInProgress = false;
+        }
+    }
 
 
     pthread_join(tidBarber, NULL);
