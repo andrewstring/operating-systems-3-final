@@ -5,7 +5,7 @@
 
 using namespace std;
 
-// access points for wait and signal
+// access points for acquire and release
 enum Mutex {
         smokerMutex,
         agentMutex,
@@ -144,6 +144,8 @@ void* smokerOne(void *sharedMemory) {
                     memory->smokerOne != memory->agentIngredients[1]) {
                     cout << "Smoker one started smoking\n";
                     cout.flush();
+
+                    // the time it takes for smoker two to finish smoking
                     this_thread::sleep_for(chrono::seconds(2));
                     cout << "Smoker one finished smoking\n";
                     cout.flush();
@@ -170,6 +172,8 @@ void* smokerTwo(void *sharedMemory) {
                     memory->smokerTwo != memory->agentIngredients[1]) {
                     cout << "Smoker two started smoking\n";
                     cout.flush();
+
+                    // the time it takes for smoker two to finish smoking
                     this_thread::sleep_for(chrono::seconds(2));
                     cout << "Smoker two finished smoking\n";
                     cout.flush();
@@ -196,6 +200,8 @@ void* smokerThree(void *sharedMemory) {
                     memory->smokerThree != memory->agentIngredients[1]) {
                     cout << "Smoker three started smoking\n";
                     cout.flush();
+
+                    // the time it takes for smoker two to finish smoking
                     this_thread::sleep_for(chrono::seconds(2));
                     cout << "Smoker three finished smoking\n";
                     cout.flush();
@@ -254,7 +260,6 @@ int main() {
     cout << "Smoker three has " + ingredientOutput[sharedMemory->smokerThree] + "\n";
     cout.flush();
 
-    //setTwoIngredients(sharedMemory);
 
     // four threads - one for the agent and three for the smokers - one thread for each smoker
     pthread_t tidSmokerOne;
@@ -271,6 +276,8 @@ int main() {
     pthread_attr_init(&attrSmokerTwo);
     pthread_attr_init(&attrSmokerThree);
     pthread_create(&tidAgent, &attrAgent, agent, sharedMemory);
+
+    // wait 2 seconds before starting the smoker threads
     this_thread::sleep_for(chrono::seconds(2));
     pthread_create(&tidSmokerOne, &attrSmokerOne, smokerOne, sharedMemory);
     pthread_create(&tidSmokerTwo, &attrSmokerTwo, smokerTwo, sharedMemory);

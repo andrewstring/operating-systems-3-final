@@ -11,6 +11,7 @@ enum Semaphore {
     chairHallwaySem,
 };
 
+// access points for acquire and release
 enum Mutex {
     taMut,
     criticalSection
@@ -148,7 +149,7 @@ void* producer(void *sharedMemory) {
     bool run = true;
 
     while (true) {
-        // only run when we have not finished (mac will give an error if this thread stops)
+        // only run when not finished producing
         if (run) {
             // array of student names
             string students[26] = {"Alpha", "Bravo", "Charlie", "Delta", "Echo",

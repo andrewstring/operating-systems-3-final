@@ -11,6 +11,7 @@ enum Semaphore {
     chairSem,
 };
 
+// access points for acquire and release
 enum Mutex {
     barberMut,
     criticalSection
@@ -159,6 +160,7 @@ void* producer(void *sharedMemory) {
                                 "Papa", "Quebec", "Romeo", "Sierra", "Tango",
                                 "Uniform", "Victor", "Whisky", "X-Ray", "Yankee",
                                 "Zulu"};
+
             enterBarberShop(memory, &people[0]);
             enterBarberShop(memory, &people[1]);
             enterBarberShop(memory, &people[2]);
