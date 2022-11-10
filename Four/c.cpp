@@ -7,6 +7,7 @@
 
 using namespace std;
 
+// access points for acquire and release
 enum Mutex {
     readerMut,
     writerMut,
@@ -74,6 +75,8 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
 void addReader(SharedMemory *sharedMemory, string *name) {
         tuple<Type, string*> newReader = make_tuple(reader, name);
         sharedMemory->numOfPeople++;
+
+        // add new reader to the reader queue
         sharedMemory->people.push(newReader);
         cout << *name + " (Type: " + typeOutput[get<0>(newReader)] + ") has been added\n";
         cout.flush();
@@ -82,32 +85,24 @@ void addReader(SharedMemory *sharedMemory, string *name) {
 void addWriter(SharedMemory *sharedMemory, string *name) {
     tuple<Type, string*> newWriter = make_tuple(writer, name);
     sharedMemory->numOfPeople++;
+
+    // add new writer to the writer queue
     sharedMemory->people.push(newWriter);
     cout << *name + " (Type: " + typeOutput[get<0>(newWriter)] + ") has been added\n";
     cout.flush();
 }
 
+// returns whether the person at the front of the queue is a reader or a writer
 Type getTypeAtFront(SharedMemory *sharedMemory) {
     return get<0>(sharedMemory->people.front());
 }
 
 
-//tuple<Type, string*> removeReader(SharedMemory *sharedMemory) {
-//    tuple<Type, string*> retrievedReader = sharedMemory->readers.front();
-//    sharedMemory->numOfReaders--;
-//    sharedMemory->readers.pop();
-//    return retrievedReader;
-//}
-//tuple<Type, string*> removeWriter(SharedMemory *sharedMemory) {
-//    tuple<Type, string*> retrievedWriter = sharedMemory->writers.front();
-//    sharedMemory->numOfWriters--;
-//    sharedMemory->writers.pop();
-//    return retrievedWriter;
-//}
-
 tuple<Type, string*> removePerson(SharedMemory *sharedMemory) {
     tuple<Type, string*> retrievedPerson = sharedMemory->people.front();
     sharedMemory->numOfPeople--;
+
+    // remove reader/writer from the people queue
     sharedMemory->people.pop();
     return retrievedPerson;
 }
@@ -120,6 +115,8 @@ void enterDatabase(SharedMemory *sharedMemory, tuple<Type, string*> person) {
             cout << *(get<1>(person)) + " (Type: " + typeOutput[get<0>(person)] + ") HAS ENTERED THE DATABASE\n";
             cout.flush();
             sharedMemory->numOfPeopleInDatabase++;
+
+            // add reader if there is no writer in the database
             sharedMemory->peopleInDatabase.push(person);
         }
     }
@@ -131,6 +128,8 @@ void enterDatabase(SharedMemory *sharedMemory, tuple<Type, string*> person) {
             cout << *(get<1>(person)) + "(Type: " + typeOutput[get<0>(person)] + ") HAS ENTERED THE DATABASE\n";
             cout.flush();
             sharedMemory->numOfPeopleInDatabase++;
+
+            // add writer if there are no readers or writers in the database
             sharedMemory->peopleInDatabase.push(person);
         }
     }
@@ -139,6 +138,8 @@ void enterDatabase(SharedMemory *sharedMemory, tuple<Type, string*> person) {
 void leaveDatabase(SharedMemory *sharedMemory) {
         tuple<Type, string*> personLeaving = sharedMemory->peopleInDatabase.front();
         if(get<0>(personLeaving) == reader) {
+
+            // remove reader from the database
             sharedMemory->peopleInDatabase.pop();
             sharedMemory->numOfReadersInDatabase--;
             cout << *(get<1>(personLeaving)) + " (Type: " + typeOutput[get<0>(personLeaving)] + ") HAS LEFT THE DATABASE\n";
@@ -150,6 +151,8 @@ void leaveDatabase(SharedMemory *sharedMemory) {
         }
 
         if(get<0>(personLeaving) == writer) {
+
+            // remove writer from the database
             sharedMemory->peopleInDatabase.pop();
             sharedMemory->numOfWritersInDatabase--;
             cout << *(get<1>(personLeaving)) + " (Type: " + typeOutput[get<0>(personLeaving)] + ") HAS LEFT THE DATABASE\n";
@@ -163,7 +166,10 @@ void* database(void *sharedMemory) {
     SharedMemory *memory = (struct SharedMemory *) sharedMemory;
 
     while(true) {
+        // check for readers/writers in the database every two seconds
         this_thread::sleep_for(chrono::seconds(2));
+
+        // if there is someone in the database, pop them out
         if(memory->numOfPeopleInDatabase > 0) {
             leaveDatabase(memory);
         }
@@ -184,6 +190,8 @@ void* producer(void *sharedMemory) {
                     if(memory->writerMutex == 1) {
                         acquire(memory, criticalSection);
                         tuple<Type, string*> readerEnteringDatabase = removePerson(memory);
+
+                        // reader an enter the database if there is no writer in the database
                         enterDatabase(memory, readerEnteringDatabase);
                         release(memory, criticalSection);
                     }
@@ -192,58 +200,16 @@ void* producer(void *sharedMemory) {
                     if(memory->readerMutex == 1 && memory->writerMutex == 1) {
                         acquire(memory, criticalSection);
                         tuple<Type, string*> writerEnteringDatabase = removePerson(memory);
+
+                        // writer can enter the database if there are no readers or writers in the database
                         enterDatabase(memory, writerEnteringDatabase);
                         release(memory, criticalSection);
                     }
                 }
             }
         }
-
-//        if(memory->criticalSection == 0) {
-//            if(memory->writerMutex == 0 && memory->numOfReaders > 0) {
-//                wait(memory, criticalSection);
-//                tuple<Type, string*> readerEnteringDatabase = removeReader(memory);
-//                enterDatabase(memory, readerEnteringDatabase);
-//                signal(memory, criticalSection);
-//            }
-//            else if(memory->readerMutex == 0 && memory->writerMutex == 0 && memory->numOfWriters > 0) {
-//                wait(memory, criticalSection);
-//                tuple<Type, string*> writerEnteringDatabase = removeWriter(memory);
-//                enterDatabase(memory, writerEnteringDatabase);
-//                signal(memory, criticalSection);
-//            }
-//        }
-
     }
 }
-
-
-//void* readerProducer(void *sharedMemory) {
-//    SharedMemory *memory = (struct SharedMemory *) sharedMemory;
-//
-//    while(true) {
-//            if (memory->writerMutex == 0 && memory->numOfReaders > 0) {
-//                tuple<Type, string*> readerEnteringDatabase = removeReader(memory);
-//                enterDatabase(memory, readerEnteringDatabase);
-//            }
-//    }
-//
-//    return NULL;
-//}
-//
-//void* writerProducer(void *sharedMemory) {
-//    SharedMemory *memory = (struct SharedMemory *) sharedMemory;
-//
-//    while(true) {
-//            if(memory->readerMutex == 0 && memory->writerMutex == 0 && memory->numOfWriters > 0) {
-//                tuple<Type, string*> writerEnteringDatabase = removeWriter(memory);
-//                enterDatabase(memory, writerEnteringDatabase);
-//
-//            }
-//    }
-//
-//    return NULL;
-//}
 
 void addPeople(SharedMemory* sharedMemory, string *students) {
     bool run1 = true;
@@ -264,6 +230,8 @@ void addPeople(SharedMemory* sharedMemory, string *students) {
     }
     release(sharedMemory, criticalSection);
 
+
+    // wait before entering more people
     this_thread::sleep_for(chrono::seconds(5));
 
     bool run2 = true;
@@ -298,32 +266,21 @@ int main() {
 
 
 
+    // two threads, consumer=database, producer=producer
     pthread_t tidDatabase;
     pthread_t tidProducer;
-    // pthread_t tidReader;
-    // pthread_t tidWriter;
     pthread_attr_t attrDatabase;
     pthread_attr_t attrProducer;
-    //pthread_attr_t attrReader;
-    //pthread_attr_t attrWriter;
 
     pthread_attr_init(&attrDatabase);
     pthread_attr_init(&attrProducer);
-    //pthread_attr_init(&attrReader);
-    //pthread_attr_init(&attrWriter);
     pthread_create(&tidDatabase, &attrDatabase, database, sharedMemory);
     pthread_create(&tidProducer, &attrProducer, producer, sharedMemory);
-    //pthread_create(&tidReader, &attrReader, readerProducer, sharedMemory);
-    //pthread_create(&tidWriter, &attrWriter, writerProducer, sharedMemory);
 
     addPeople(sharedMemory, people);
 
-
-
     pthread_join(tidDatabase, NULL);
     pthread_join(tidProducer, NULL);
-    //pthread_join(tidReader, NULL);
-    //pthread_join(tidWriter, NULL);
 
     return 0;
 }
