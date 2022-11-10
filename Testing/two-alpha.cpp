@@ -29,6 +29,8 @@ struct SharedMemory {
     int smokerMutex = 1;
     int agentMutex = 1;
     int criticalSection = 1;
+    int numOfRounds = 5;
+    int roundCounter = 0;
     Ingredient smokerOne;
     Ingredient smokerTwo;
     Ingredient smokerThree;
@@ -190,6 +192,7 @@ void* smokerOne(void *sharedMemory) {
                         "Smoker Mutex was not successfully acquired"
                     );
                     release(memory, agentMutex);
+                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -228,6 +231,7 @@ void* smokerTwo(void *sharedMemory) {
                         "Smoker Mutex was not successfully acquired"
                     );
                     release(memory, agentMutex);
+                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -266,6 +270,7 @@ void* smokerThree(void *sharedMemory) {
                         "Smoker Mutex was not successfully acquired"
                     );
                     release(memory, agentMutex);
+                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -280,7 +285,7 @@ void* agent(void *sharedMemory) {
     acquire(memory, smokerMutex);
 
     while (true) {
-        if (memory->criticalSection == 1) {
+        if (memory->criticalSection == 1 && memory->roundCounter < memory->numOfRounds) {
             acquire(memory, criticalSection);
             if (memory->agentMutex == 1) {
                 // set two ingredients for each agent round
@@ -346,6 +351,15 @@ int main() {
     pthread_create(&tidSmokerOne, &attrSmokerOne, smokerOne, sharedMemory);
     pthread_create(&tidSmokerTwo, &attrSmokerTwo, smokerTwo, sharedMemory);
     pthread_create(&tidSmokerThree, &attrSmokerThree, smokerThree, sharedMemory);
+
+    bool testInProgress = true;
+    while(testInProgress) {
+        if(sharedMemory->roundCounter >= sharedMemory->numOfRounds) {
+            this_thread::sleep_for(chrono::seconds(5));
+            endTesting();
+            testInProgress = false;
+        }
+    }
 
     pthread_join(tidAgent, NULL);
     pthread_join(tidSmokerOne, NULL);
