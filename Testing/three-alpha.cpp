@@ -22,6 +22,7 @@ struct SharedMemory {
     int criticalSection = 1;
     int chairHallwaySemaphore = 0;
     int numOfChairsHallway = 3;
+    int testCounter = 0;
     // we will use a queue for students in hallway so that first student will be served first
     queue<string *> studentsInHallway;
     // TA queue will only ever be max length 1, but this makes it easy to push student into the
@@ -157,6 +158,7 @@ void taHelpStudent(SharedMemory *sharedMemory) {
         "Released TA Mutex when student with TA queue is empty",
         "Released TA Mutex when student with TA queue was not empty"
     );
+    sharedMemory->testCounter++;
 }
 
 void* ta(void *sharedMemory) {
@@ -269,6 +271,15 @@ int main() {
     pthread_attr_init(&attrProducer);
     pthread_create(&tidTa, &attrTa, ta, sharedMemory);
     pthread_create(&tidProducer, &attrProducer, producer, sharedMemory);
+
+    bool testInProgress = true;
+    while(testInProgress) {
+        if(sharedMemory->testCounter >= 6) {
+            this_thread::sleep_for(chrono::seconds(4));
+            endTesting();
+            testInProgress = false;
+        }
+    }
 
 
     pthread_join(tidTa, NULL);
