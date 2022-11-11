@@ -6,23 +6,14 @@
 
 using namespace std;
 
-// access points for wait and signal
 enum Mutex {
         smokerMutex,
         agentMutex,
         criticalSection,
 };
 
-// enum Ingredient {
-//     Tobacco,
-//     Paper,
-//     Matches
-// };
-
-// mapping that will be used for accessing Ingredients by index
 Ingredient ingredientMapping[3] = {Tobacco, Paper, Matches};
 
-// output mapping that will be used to print the Ingredient via cout
 string ingredientOutput[3] = {"Tobacco", "Paper", "Matches"};
 
 struct SharedMemory {
@@ -78,7 +69,6 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
     }
 }
 
-// random number generator for ingredient index
 int getRandomIngredientIndex(int min, int max) {
     int val = rand() % (max+1) + min;
     int inArrayCheck[max+1];
@@ -97,14 +87,11 @@ int getRandomIngredientIndex(int min, int max) {
 }
 
 void setSmokerIngredients(SharedMemory *sharedMemory) {
-    //ingredient array
     Ingredient ingredient[3];
 
-    //set first ingredient
     int ingredientOneIndex = getRandomIngredientIndex(0,2);
     ingredient[0] = ingredientMapping[ingredientOneIndex];
 
-    //set second ingredient
     Ingredient remainingIngredients[2];
     int index = 0;
     for (int i = 0; i < 3; ++i) {
@@ -116,7 +103,6 @@ void setSmokerIngredients(SharedMemory *sharedMemory) {
     int ingredientTwoIndex = getRandomIngredientIndex(0,1);
     ingredient[1] = remainingIngredients[ingredientTwoIndex];
 
-    //set third ingredient
     Ingredient reminingIngredient;
     for(int i = 0; i < 3; ++i) {
         if (ingredientMapping[i] != ingredient[0] && ingredientMapping[i] != ingredient[1]) {
@@ -131,18 +117,15 @@ void setSmokerIngredients(SharedMemory *sharedMemory) {
         "Not all agent ingredients are unique"
     );
 
-    //set smoker ingredients
     sharedMemory->smokerOne = ingredient[0];
     sharedMemory->smokerTwo = ingredient[1];
     sharedMemory->smokerThree = ingredient[2];
 }
 
 void setTwoIngredients(SharedMemory *sharedMemory) {
-    //set first ingredient
     int ingredientOneIndex = getRandomIngredientIndex(0,2);
     sharedMemory->agentIngredients[0] = ingredientMapping[ingredientOneIndex];
 
-    //set second ingredient
     Ingredient remainingIngredients[2];
     int index = 0;
     for (int i = 0; i < 3; ++i) {
@@ -170,7 +153,6 @@ void* smokerOne(void *sharedMemory) {
         if (memory->smokerMutex == 1 && memory->criticalSection == 1) {
             if (memory->criticalSection == 1) {
                 acquire(memory, criticalSection);
-                // only run if smoker has the third ingredient
                 if (memory->smokerOne != memory->agentIngredients[0] and
                     memory->smokerOne != memory->agentIngredients[1]) {
                         assertIngredientNotInArray(
@@ -179,11 +161,7 @@ void* smokerOne(void *sharedMemory) {
                             "Smoker one did not have the two agent ingredients",
                             "Smoker one had one of the two agent ingredients"
                         );
-                    //cout << "Smoker one started smoking\n";
-                    //cout.flush();
                     this_thread::sleep_for(chrono::seconds(2));
-                    //cout << "Smoker one finished smoking\n";
-                    //cout.flush();
                     acquire(memory, smokerMutex);
                     assertInt(
                         memory->smokerMutex,
@@ -218,11 +196,7 @@ void* smokerTwo(void *sharedMemory) {
                             "Smoker two did not have the two agent ingredients",
                             "Smoker two had one of the two agent ingredients"
                         );
-                    //cout << "Smoker two started smoking\n";
-                    //cout.flush();
                     this_thread::sleep_for(chrono::seconds(2));
-                    //cout << "Smoker two finished smoking\n";
-                    //cout.flush();
                     acquire(memory, smokerMutex);
                     assertInt(
                         memory->smokerMutex,
@@ -257,11 +231,7 @@ void* smokerThree(void *sharedMemory) {
                             "Smoker three did not have the two agent ingredients",
                             "Smoker three had one of the two agent ingredients"
                         );
-                    //cout << "Smoker three started smoking\n";
-                    //cout.flush();
                     this_thread::sleep_for(chrono::seconds(2));
-                    //cout << "Smoker three finished smoking\n";
-                    //cout.flush();
                     acquire(memory, smokerMutex);
                     assertInt(
                         memory->smokerMutex,
@@ -288,11 +258,7 @@ void* agent(void *sharedMemory) {
         if (memory->criticalSection == 1 && memory->roundCounter < memory->numOfRounds) {
             acquire(memory, criticalSection);
             if (memory->agentMutex == 1) {
-                // set two ingredients for each agent round
                 setTwoIngredients(memory);
-                //cout << "Agent has placed: " + ingredientOutput[memory->agentIngredients[0]]
-                //        + " and " + ingredientOutput[memory->agentIngredients[1]] + "\n";
-                //cout.flush();
                 acquire(memory, agentMutex);
                 assertInt(
                     memory->agentMutex,
@@ -301,7 +267,6 @@ void* agent(void *sharedMemory) {
                     "Agent Mutex was not successfully acquired"
                 );
 
-                // this wait is the time it takes for agent to place ingredients on table
                 this_thread::sleep_for(chrono::seconds(2));
                 release(memory, smokerMutex);
             }
@@ -317,22 +282,10 @@ int main() {
 
     SharedMemory *sharedMemory = &sMem;
 
-    //get random ingredient indices
     srand(time(NULL));
     setSmokerIngredients(sharedMemory);
     setTwoIngredients(sharedMemory);
 
-    //display what each smoker has
-    //cout << "Smoker one has " + ingredientOutput[sharedMemory->smokerOne] + "\n";
-    //cout.flush();
-    //cout << "Smoker two has " + ingredientOutput[sharedMemory->smokerTwo] + "\n";
-    //cout.flush();
-    //cout << "Smoker three has " + ingredientOutput[sharedMemory->smokerThree] + "\n";
-    //cout.flush();
-
-    //setTwoIngredients(sharedMemory);
-
-    // four threads - one for the agent and three for the smokers - one thread for each smoker
     pthread_t tidSmokerOne;
     pthread_t tidSmokerTwo;
     pthread_t tidSmokerThree;

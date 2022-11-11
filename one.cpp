@@ -118,6 +118,7 @@ void cutHair(SharedMemory *sharedMemory) {
     cout << "Started cutting " + *customer + "'s hair\n";
     cout.flush();
 
+    // take 2 seconds to cut hair
     this_thread::sleep_for(chrono::seconds(2));
 
     memory->customersInShop.pop();

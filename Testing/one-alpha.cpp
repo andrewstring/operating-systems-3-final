@@ -7,7 +7,6 @@
 
 using namespace std;
 
-// access points for wait and signal
 enum Semaphore {
     chairSem,
 };
@@ -17,7 +16,6 @@ enum Mutex {
     criticalSection
 };
 
-// will keep a queue so that first customers will be served first
 struct SharedMemory {
     int barberMutex = 1;
     int criticalSection = 1;
@@ -85,7 +83,6 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
 }
 
 
-// setup the number of chairs that are open to sit in
 void setNumChairs(SharedMemory *sharedMemory, int numChairs) {
     sharedMemory->numOfChairs = numChairs;
     assertInt(
@@ -99,15 +96,12 @@ void setNumChairs(SharedMemory *sharedMemory, int numChairs) {
 void enterBarberShop(SharedMemory *sharedMemory, string *customer) {
     acquire(sharedMemory, criticalSection);
 
-    // only allow customers to enter if there are open seats
     if (sharedMemory->chairSemaphore >= sharedMemory->numOfChairs) {
         assertLessThanEqualTo(
             sharedMemory->numOfChairs,
             sharedMemory->chairSemaphore,
             "Full semaphore prevented admission of customer",
             "Full semaphore did not prevent admission of customer");
-        //cout << "Barber shop is full..." + *customer + " did not enter\n";
-        //cout.flush();
     }
     else {
         assertLessThan(
@@ -116,8 +110,6 @@ void enterBarberShop(SharedMemory *sharedMemory, string *customer) {
             "Non-full semaphore allowed admission of customer",
             "Non-full semaphore did not allow admission of customer");
         sharedMemory->customersInShop.push(customer);
-        //cout << *customer + " has entered the barber shop\n";
-        //cout.flush();
         wait(sharedMemory,chairSem);
     }
 
@@ -132,9 +124,6 @@ void leaveBarberShop(SharedMemory *sharedMemory, string *customer) {
         "Barber Mutex successful release",
         "Barber Mutex unsuccessful release");
     sharedMemory->testCounter++;
-
-    //cout << *customer + " left the barber shop\n";
-    //cout.flush();
 }
 
 void cutHair(SharedMemory *sharedMemory) {
@@ -148,19 +137,11 @@ void cutHair(SharedMemory *sharedMemory) {
         "Barber Mutex unsuccessful acquire"
     );
 
-    // dequeue customer having their haircut
     string *customer = memory->customersInShop.front();
-    //cout << "Started cutting " + *customer + "'s hair\n";
-    //cout.flush();
 
     this_thread::sleep_for(chrono::seconds(2));
 
     memory->customersInShop.pop();
-    //cout << "Finished cutting " + *customer + "'s hair\n";
-    //cout.flush();
-
-    
-
     leaveBarberShop(memory, customer);
 }
 
@@ -169,7 +150,6 @@ void cutHair(SharedMemory *sharedMemory) {
 void* barber(void *sharedMemory) {
     SharedMemory *memory = (struct SharedMemory *) sharedMemory;
 
-    // cut hair if there are customers in the shop and not busy
     while (true) {
         if (memory->criticalSection == 1) {
             if (memory->chairSemaphore > 0 && memory->barberMutex == 1) {
@@ -194,9 +174,7 @@ void* producer(void *sharedMemory) {
     bool run = true;
 
     while (true) {
-        // only run producer code once
         if (run) {
-            // sample names
             string people[26] = {"Alpha", "Bravo", "Charlie", "Delta", "Echo",
                                 "Foxtrot", "Golf", "Hotel", "India", "Juliet",
                                 "Kilo", "Lima", "Mike", "November", "Oscar",
@@ -209,14 +187,12 @@ void* producer(void *sharedMemory) {
             enterBarberShop(memory, &people[3]);
             enterBarberShop(memory, &people[4]);
 
-            // wait before entering more people
             this_thread::sleep_for(chrono::seconds(3));
             enterBarberShop(memory, &people[5]);
             enterBarberShop(memory, &people[6]);
             enterBarberShop(memory, &people[7]);
             enterBarberShop(memory, &people[8]);
 
-            // wait before entering more people
             this_thread::sleep_for(chrono::seconds(10));
             enterBarberShop(memory, &people[9]);
 
@@ -229,7 +205,6 @@ void* producer(void *sharedMemory) {
                 "Customer queue or chairSemaphore ERROR: both should equal zero when all customers have left"
             );
 
-            //prevent from running again
             run = false;
         }
     }
@@ -242,7 +217,6 @@ int main() {
 
     setNumChairs(sharedMemory, 3);
 
-    // two threads, consumer=barber, producer=waiting area (for customers)
     pthread_t tidBarber;
     pthread_t tidProducer;
     pthread_attr_t attrBarber;
@@ -257,6 +231,7 @@ int main() {
     bool testInProgress = true;
 
     while (testInProgress) {
+        // we use 5 since there will be 5 customer in barber shop
         if(sharedMemory->testCounter >= 5) {
             this_thread::sleep_for(chrono::seconds(5));
             endTesting();
