@@ -158,7 +158,6 @@ void* smokerOne(void *sharedMemory) {
                     cout.flush();
                     acquire(memory, smokerMutex);
                     release(memory, agentMutex);
-                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -187,7 +186,6 @@ void* smokerTwo(void *sharedMemory) {
                     cout.flush();
                     acquire(memory, smokerMutex);
                     release(memory, agentMutex);
-                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -216,7 +214,6 @@ void* smokerThree(void *sharedMemory) {
                     cout.flush();
                     acquire(memory, smokerMutex);
                     release(memory, agentMutex);
-                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -246,11 +243,12 @@ void* agent(void *sharedMemory) {
                     // this wait is the time it takes for agent to place ingredients on table
                     this_thread::sleep_for(chrono::seconds(2));
                     release(memory, smokerMutex);
+                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
             else {
-                cout << "Rounds completed\n";
+                cout << "Agent rounds completed\n";
                 cout.flush();
                 running = false;
             }
@@ -266,7 +264,7 @@ int main() {
     SharedMemory *sharedMemory = &sMem;
 
     // change value of second argument to change number of rounds
-    setNumRounds(sharedMemory, 5);
+    setNumRounds(sharedMemory, 6);
 
     //get random ingredient indices
     srand(time(NULL));

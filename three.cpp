@@ -79,6 +79,10 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
     }
 }
 
+void setNumHallwayChairs(SharedMemory *sharedMemory, int numChairs) {
+    sharedMemory->numOfChairsHallway = numChairs;
+}
+
 void enterHallway(SharedMemory *sharedMemory, string *student) {
     acquire(sharedMemory, criticalSection);
     // do not admit students into the hallway if it is full
@@ -204,6 +208,9 @@ void* producer(void *sharedMemory) {
 int main() {
 
     SharedMemory *sharedMemory = &sMem;
+
+    // change second argument value to change number of chairs
+    setNumHallwayChairs(sharedMemory, 5);
 
     // two threads - producer=students entering hallway, consumer=TA
     pthread_t tidTa;
