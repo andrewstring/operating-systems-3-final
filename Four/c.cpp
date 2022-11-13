@@ -191,7 +191,7 @@ void* producer(void *sharedMemory) {
                         acquire(memory, criticalSection);
                         tuple<Type, string*> readerEnteringDatabase = removePerson(memory);
 
-                        // reader an enter the database if there is no writer in the database
+                        // reader can enter the database if there is no writer in the database
                         enterDatabase(memory, readerEnteringDatabase);
                         release(memory, criticalSection);
                     }

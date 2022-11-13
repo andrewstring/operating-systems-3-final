@@ -353,6 +353,7 @@ int main() {
 
     setRRQuantum(sharedMemory, 5);
 
+    // three threads, consumer=monkeyConsumer, producer1=eastward, producer2=westward
     pthread_t tidMonkeyConsumer;
     pthread_t tidEastwardProducer;
     pthread_t tidWestwardProducer;

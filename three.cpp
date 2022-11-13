@@ -24,7 +24,7 @@ struct SharedMemory {
     int numOfChairsHallway = 3;
     // we will use a queue for students in hallway so that first student will be served first
     queue<string *> studentsInHallway;
-    // TA queue will only ever be max length 1, but this makes it easy to push student into the
+    // TA queue will only ever be max size 1, but this makes it easy to push student into the
     // TAs office and pop them out once they are done
     queue<string *> studentWithTa;
 } sMem;
@@ -81,11 +81,12 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
 
 void enterHallway(SharedMemory *sharedMemory, string *student) {
     acquire(sharedMemory, criticalSection);
-    // only allow students to enter hallway if it is not full
+    // do not admit students into the hallway if it is full
     if (sharedMemory->chairHallwaySemaphore >= sharedMemory->numOfChairsHallway) {
         cout << "Hallway is full..." + *student + " did not enter\n";
         cout.flush();
     }
+    // allow students to enter the hallway otherwise
     else {
         cout << *student + " has sat down in the hallway\n";
         wait(sharedMemory, chairHallwaySem);
@@ -204,7 +205,7 @@ int main() {
 
     SharedMemory *sharedMemory = &sMem;
 
-    // we will have two threads - producer=students entering hallway, consumer=TA
+    // two threads - producer=students entering hallway, consumer=TA
     pthread_t tidTa;
     pthread_t tidProducer;
     pthread_attr_t attrTa;

@@ -186,6 +186,7 @@ void* northProducer(void *sharedMemory) {
     }
     release(memory, criticalSection);
 
+    // will wait some time before producing more travelers
     this_thread::sleep_for(chrono::seconds(5));
 
     bool run2 = true;
@@ -223,7 +224,7 @@ void* southProducer(void *sharedMemory) {
     }
     release(memory, criticalSection);
 
-    // will wait some time before producing more traveler
+    // will wait some time before producing more travelers
     this_thread::sleep_for(chrono::seconds(4));
 
     bool run2 = true;
@@ -323,6 +324,7 @@ int main() {
 
     setRRQuantum(sharedMemory, 5);
 
+    // three threads, consumer: travelerConsumer, producer1: northProducer, producer2: southProducer
     pthread_t tidTravelerConsumer;
     pthread_t tidNorthProducer;
     pthread_t tidSouthProducer;

@@ -314,7 +314,7 @@ void* monkeyConsumer(void *sharedMemory) {
 int main() {
     SharedMemory *sharedMemory = &sMem;
 
-    // three threads, consumer=monkey, producer1=eastward, producer2=westward
+    // three threads, consumer=monkeyConsumer, producer1=eastward, producer2=westward
     pthread_t tidMonkeyConsumer;
     pthread_t tidEastwardProducer;
     pthread_t tidWestwardProducer;
@@ -329,6 +329,7 @@ int main() {
     pthread_create(&tidEastwardProducer, &attrEastwardProducer, eastwardProducer, sharedMemory);
     pthread_create(&tidWestwardProducer, &attrWestwardProducer, westwardProducer, sharedMemory);
 
+    // wait some time before starting consumer thread
     this_thread::sleep_for(chrono::seconds(3));
     pthread_create(&tidMonkeyConsumer, &attrMonkeyConsumer, monkeyConsumer, sharedMemory);
 
