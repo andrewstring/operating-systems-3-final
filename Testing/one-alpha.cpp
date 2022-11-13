@@ -195,8 +195,11 @@ void* producer(void *sharedMemory) {
 
             this_thread::sleep_for(chrono::seconds(10));
             enterBarberShop(memory, &people[9]);
+            enterBarberShop(memory, &people[10]);
+            enterBarberShop(memory, &people[11]);
 
             this_thread::sleep_for(chrono::seconds(5));
+            enterBarberShop(memory, &people[12]);
 
             assertInt(
                 memory->customersInShop.size(),

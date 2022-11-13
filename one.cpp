@@ -146,6 +146,8 @@ void* barber(void *sharedMemory) {
     return NULL;
 }
 
+// to change admission of customers, add/remove enterBarberShop calls, with different indices of people
+// in second argument for different people to enter
 void* producer(void *sharedMemory) {
     SharedMemory *memory = (SharedMemory *) sharedMemory;
 
@@ -190,6 +192,7 @@ void* producer(void *sharedMemory) {
 int main() {
     SharedMemory *sharedMemory = &sMem;
 
+    // change second argument value to change number of chairs
     setNumChairs(sharedMemory, 3);
 
     // two threads, consumer=barber, producer=waiting area (for customers)

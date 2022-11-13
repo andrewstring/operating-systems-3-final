@@ -15,3 +15,21 @@ NOTE:
     to add an extra student when the hallway is full, the testCounter
     would not be incremented by 1, since that student will not enter
     the hallway and be operated on).
+
+Changing tests for 1:
+    In producer function, change the enterBarberShop calls, accessing different
+    indices of the people array to add different people. You can also add/change
+    the thread sleep times to wait between adding people
+
+Changing tests for 2:
+    In struct SharedMemory, change the value of numOfRounds
+
+Changing tests for 3:
+    In producer function, change the enterHallway calls, accessing different indices
+    of the people array to add different people. You can also add/change
+    the thread sleep times to wait between adding people
+
+Changing tests for 4:
+    In the addPeople function, change the addReader/addWriter calls, accessing different
+    indices of the students array. You can also add/change the thread sleep
+    times to wait between adding people

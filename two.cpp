@@ -28,6 +28,8 @@ struct SharedMemory {
     int smokerMutex = 1;
     int agentMutex = 1;
     int criticalSection = 1;
+    int numOfRounds = 0;
+    int roundCounter = 0;
     Ingredient smokerOne;
     Ingredient smokerTwo;
     Ingredient smokerThree;
@@ -73,6 +75,11 @@ void release(SharedMemory *sharedMemory, Mutex toAccess) {
             break;
 
     }
+}
+
+// function to set the number of rounds
+void setNumRounds(SharedMemory *sharedMemory, int numRounds) {
+    sharedMemory->numOfRounds = numRounds;
 }
 
 // random number generator for ingredient index
@@ -151,6 +158,7 @@ void* smokerOne(void *sharedMemory) {
                     cout.flush();
                     acquire(memory, smokerMutex);
                     release(memory, agentMutex);
+                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -179,6 +187,7 @@ void* smokerTwo(void *sharedMemory) {
                     cout.flush();
                     acquire(memory, smokerMutex);
                     release(memory, agentMutex);
+                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -207,6 +216,7 @@ void* smokerThree(void *sharedMemory) {
                     cout.flush();
                     acquire(memory, smokerMutex);
                     release(memory, agentMutex);
+                    memory->roundCounter++;
                 }
                 release(memory, criticalSection);
             }
@@ -220,23 +230,32 @@ void* agent(void *sharedMemory) {
     SharedMemory *memory = (SharedMemory *) sharedMemory;
     acquire(memory, smokerMutex);
 
-    while (true) {
+    bool running = true;
+    while (running) {
         if (memory->criticalSection == 1) {
-            acquire(memory, criticalSection);
-            if (memory->agentMutex == 1) {
-                // set two ingredients for each agent round
-                setTwoIngredients(memory);
-                cout << "Agent has placed: " + ingredientOutput[memory->agentIngredients[0]]
-                        + " and " + ingredientOutput[memory->agentIngredients[1]] + "\n";
-                cout.flush();
-                acquire(memory, agentMutex);
+            if (memory->roundCounter < memory->numOfRounds) {
+                acquire(memory, criticalSection);
+                if (memory->agentMutex == 1) {
+                    // set two ingredients for each agent round
+                    setTwoIngredients(memory);
+                    cout << "Agent has placed: " + ingredientOutput[memory->agentIngredients[0]]
+                            + " and " + ingredientOutput[memory->agentIngredients[1]] + "\n";
+                    cout.flush();
+                    acquire(memory, agentMutex);
 
-                // this wait is the time it takes for agent to place ingredients on table
-                this_thread::sleep_for(chrono::seconds(2));
-                release(memory, smokerMutex);
+                    // this wait is the time it takes for agent to place ingredients on table
+                    this_thread::sleep_for(chrono::seconds(2));
+                    release(memory, smokerMutex);
+                }
+                release(memory, criticalSection);
             }
-            release(memory, criticalSection);
+            else {
+                cout << "Rounds completed\n";
+                cout.flush();
+                running = false;
+            }
         }
+        
     }
 
     return NULL;
@@ -244,8 +263,10 @@ void* agent(void *sharedMemory) {
 
 int main() {
 
-
     SharedMemory *sharedMemory = &sMem;
+
+    // change value of second argument to change number of rounds
+    setNumRounds(sharedMemory, 5);
 
     //get random ingredient indices
     srand(time(NULL));

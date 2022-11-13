@@ -207,6 +207,19 @@ void* producer(void *sharedMemory) {
 
             this_thread::sleep_for(chrono::seconds(8));
 
+            bool run3 = true;
+            while(run3) {
+                if(memory->criticalSection == 1) {
+                    acquire(memory, criticalSection);
+                    enterHallway(memory, &students[10]);
+                    enterHallway(memory, &students[11]);
+                    release(memory, criticalSection);
+                    run3 = false;
+                    }
+            }
+
+            this_thread::sleep_for(chrono::seconds(8));
+
             assertInt(
                 memory->studentsInHallway.size(),
                 0,
